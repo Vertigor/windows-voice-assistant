@@ -29,7 +29,7 @@
 
 - **语音识别**: RealtimeSTT + Whisper
 - **语音合成**: Coqui TTS
-- **意图理解**: Ollama + 本地 LLM
+- **意图理解**: Ollama + 本地 LLM / OpenAI 兼容 API
 - **邮件处理**: IMAPClient + exchangelib
 - **文件操作**: pathlib + shutil + watchdog
 - **系统集成**: pystray + pynput
@@ -39,9 +39,13 @@
 ### 前置要求
 
 1. **Python 3.9-3.11**
-2. **Ollama**（用于意图理解）
-   - 下载：https://ollama.com/download
-   - 安装后运行：`ollama pull qwen2.5:3b`
+2. **LLM 服务**（二选一）：
+   - **方案一：Ollama**（本地运行）
+     - 下载：https://ollama.com/download
+     - 安装后运行：`ollama pull qwen2.5:3b`
+   - **方案二：OpenAI 兼容 API**（云服务）
+     - 支持 OpenAI、DeepSeek、通义千问等提供商
+     - 需要 API Key
 
 ### 安装步骤
 
@@ -91,8 +95,51 @@ python -m voice_assistant
 1. 邮箱账户设置
 2. 文件整理规则
 3. 唤醒词和快捷键
+4. LLM 服务配置
 
 配置文件位于：`%APPDATA%/VoiceAssistant/config.json`
+
+### LLM 配置示例
+
+**使用 Ollama（本地）**：
+```json
+{
+  "llm": {
+    "provider": "ollama",
+    "model": "qwen2.5:3b",
+    "api_base": "http://localhost:11434",
+    "temperature": 0.7
+  }
+}
+```
+
+**使用 OpenAI**：
+```json
+{
+  "llm": {
+    "provider": "openai",
+    "model": "gpt-3.5-turbo",
+    "api_base": "https://api.openai.com/v1",
+    "api_key": "sk-...",
+    "temperature": 0.7,
+    "max_tokens": 500
+  }
+}
+```
+
+**使用 DeepSeek**：
+```json
+{
+  "llm": {
+    "provider": "openai",
+    "model": "deepseek-chat",
+    "api_base": "https://api.deepseek.com/v1",
+    "api_key": "sk-...",
+    "temperature": 0.7,
+    "max_tokens": 500
+  }
+}
+```
 
 ## 安全性
 

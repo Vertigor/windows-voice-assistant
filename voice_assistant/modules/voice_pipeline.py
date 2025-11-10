@@ -113,41 +113,83 @@ class VoicePipeline:
         self.logger.info(f"分析意图: {text}")
         
         try:
-            # 调用 Ollama API
             llm_config = self.config.get('llm', {})
-            api_base = llm_config.get('api_base', 'http://localhost:11434')
-            model = llm_config.get('model', 'qwen2.5:3b')
+            provider = llm_config.get('provider', 'ollama')
             
             # 构建 Prompt
             prompt = self._build_intent_prompt(text)
             
-            # 调用 API
-            response = requests.post(
-                f"{api_base}/api/generate",
-                json={
-                    'model': model,
-                    'prompt': prompt,
-                    'stream': False,
-                    'options': {
-                        'temperature': llm_config.get('temperature', 0.7)
-                    }
-                },
-                timeout=10
-            )
+            # 根据提供商调用不同的 API
+            if provider == 'openai':
+                intent_text = self._call_openai_api(prompt, llm_config)
+            else:  # ollama
+                intent_text = self._call_ollama_api(prompt, llm_config)
             
-            if response.status_code == 200:
-                result = response.json()
-                intent_text = result.get('response', '')
-                
-                # 解析意图结果
-                return self._parse_intent_response(intent_text)
-            else:
-                self.logger.error(f"LLM API 调用失败: {response.status_code}")
-                return {'intent': 'unknown', 'entities': {}}
+            # 解析意图结果
+            return self._parse_intent_response(intent_text)
         
         except Exception as e:
             self.logger.error(f"意图理解失败: {e}", exc_info=True)
             return {'intent': 'unknown', 'entities': {}}
+    
+    def _call_ollama_api(self, prompt: str, config: Dict[str, Any]) -> str:
+        """调用 Ollama API"""
+        api_base = config.get('api_base', 'http://localhost:11434')
+        model = config.get('model', 'qwen2.5:3b')
+        
+        response = requests.post(
+            f"{api_base}/api/generate",
+            json={
+                'model': model,
+                'prompt': prompt,
+                'stream': False,
+                'options': {
+                    'temperature': config.get('temperature', 0.7)
+                }
+            },
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            return result.get('response', '')
+        else:
+            self.logger.error(f"Ollama API 调用失败: {response.status_code}")
+            return ''
+    
+    def _call_openai_api(self, prompt: str, config: Dict[str, Any]) -> str:
+        """调用 OpenAI 兼容 API"""
+        from openai import OpenAI
+        
+        api_base = config.get('api_base', 'https://api.openai.com/v1')
+        api_key = config.get('api_key', '')
+        model = config.get('model', 'gpt-3.5-turbo')
+        
+        if not api_key:
+            self.logger.error("OpenAI API Key 未配置")
+            return ''
+        
+        try:
+            client = OpenAI(
+                api_key=api_key,
+                base_url=api_base
+            )
+            
+            response = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {"role": "system", "content": "你是一个智能语音助手的意图识别系统。"},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=config.get('temperature', 0.7),
+                max_tokens=config.get('max_tokens', 500)
+            )
+            
+            return response.choices[0].message.content
+        
+        except Exception as e:
+            self.logger.error(f"OpenAI API 调用失败: {e}")
+            return ''
     
     def _build_intent_prompt(self, text: str) -> str:
         """构建意图理解的 Prompt"""

@@ -5,6 +5,7 @@ TTS>=0.22.0
 
 # 意图理解
 requests>=2.31.0  # 用于调用 Ollama API
+openai>=1.0.0  # 用于调用 OpenAI 兼容 API
 
 # 邮件处理
 IMAPClient>=3.0.0

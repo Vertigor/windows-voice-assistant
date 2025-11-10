@@ -56,10 +56,12 @@ class ConfigManager:
                 'rules': []
             },
             'llm': {
-                'provider': 'ollama',
+                'provider': 'ollama',  # 'ollama' 或 'openai'
                 'model': 'qwen2.5:3b',
                 'api_base': 'http://localhost:11434',
-                'temperature': 0.7
+                'api_key': '',  # OpenAI 兼容接口的 API Key
+                'temperature': 0.7,
+                'max_tokens': 500
             }
         }
         

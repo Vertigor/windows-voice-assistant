@@ -18,9 +18,11 @@
 
 **注意**: 安装时请勾选 "Add Python to PATH" 选项。
 
-### 2. 安装 Ollama
+### 2. 安装 LLM 服务（二选一）
 
-Ollama 用于本地运行大语言模型，是意图理解功能的核心组件。
+#### 方案一：Ollama（推荐）
+
+Ollama 用于本地运行大语言模型，完全免费且保护隐私。
 
 1. 访问 [Ollama 官网](https://ollama.com/download)
 2. 下载 Windows 版本安装程序
@@ -32,6 +34,17 @@ ollama pull qwen2.5:3b
 ```
 
 **注意**: 模型文件约 2GB，下载可能需要一些时间。
+
+#### 方案二：OpenAI 兼容 API
+
+如果您不想本地部署模型，可以使用云服务。支持的提供商：
+
+- **OpenAI**: https://platform.openai.com/
+- **DeepSeek**（推荐，价格便宜）: https://platform.deepseek.com/
+- **通义千问**: https://dashscope.aliyun.com/
+- **智谱 AI**: https://open.bigmodel.cn/
+
+详细配置请参考 [LLM 配置指南](LLM_CONFIG.md)。
 
 ### 3. 克隆项目
 
